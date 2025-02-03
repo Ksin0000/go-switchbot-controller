@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/yourusername/go-switchbot-controller/switchbot"
+	"github.com/Ksin0000/go-switchbot-controller/switchbot"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module github.com/yourusername/go-switchbot-controller
+module github.com/Ksin0000/go-switchbot-controller
 
 go 1.18
 
