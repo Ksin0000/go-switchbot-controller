@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/google/uuid"
 )
 
 // 認証情報を.envファイルから取得
@@ -42,14 +43,14 @@ func getAuthInfo() (string, string) {
 // getAuthHeaders は認証用のヘッダーを生成します
 func getAuthHeaders() map[string]string {
 	token, device_id := getAuthInfo()
-	nonce := ""
+	nonce := uuid.New().String()
 	timestamp := strconv.FormatInt(time.Now().UnixNano()/1e6, 10)
 
 	// 署名文字列の作成
 	stringToSign := token + timestamp + nonce
 	
 	// HMAC-SHA256の計算
-	h := hmac.New(sha256.New, []byte(device_id))
+	h := hmac.New(sha256.New, []byte(token))
 	h.Write([]byte(stringToSign))
 	sign := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
