@@ -26,23 +26,23 @@ func getAuthInfo() (string, string) {
 	}
 
 	token := os.Getenv("SWITCHBOT_TOKEN")
-	device_id := os.Getenv("DEVICE_ID")
+	secret := os.Getenv("SECRET")
 	
 	if token == "" {
 		fmt.Println(".envファイルにSWITCHBOT_TOKENが設定されていません")
 		os.Exit(1)
 	}
-	if device_id == "" {
-		fmt.Println(".envファイルにDEVICE_IDが設定されていません") 
+	if secret == "" {
+		fmt.Println(".envファイルにSECRETが設定されていません") 
 		os.Exit(1)
 	}
 	
-	return token, device_id
+	return token, secret
 }
 
 // getAuthHeaders は認証用のヘッダーを生成します
 func getAuthHeaders() map[string]string {
-	token, device_id := getAuthInfo()
+	token, secret := getAuthInfo()
 	nonce := uuid.New().String()
 	timestamp := strconv.FormatInt(time.Now().UnixNano()/1e6, 10)
 
@@ -50,7 +50,7 @@ func getAuthHeaders() map[string]string {
 	stringToSign := token + timestamp + nonce
 	
 	// HMAC-SHA256の計算
-	h := hmac.New(sha256.New, []byte(token))
+	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(stringToSign))
 	sign := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
