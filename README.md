@@ -1,39 +1,21 @@
-# SwitchBot API コントローラー
+# Go-Switchbot-Controller
 
-このプログラムは、SwitchBot APIを使用してデバイス一覧を取得するためのGo言語で書かれたアプリケーションです。
+GoのWailsを使ってスイッチボットを操作したり、windowsをスリープしたりする。
 
-## 必要条件
+## About
 
-- Go 1.16以上
-- SwitchBot APIトークン
-- SwitchBot APIシークレット
+This is the official Wails React-TS template.
 
-## セットアップ
+You can configure the project by editing `wails.json`. More information about the project settings can be found
+here: https://wails.io/docs/reference/project-config
 
-1. 必要なパッケージのインストール:
-```bash
-go mod init switchbot-controller
-go get github.com/joho/godotenv
-go get github.com/google/uuid
-```
+## Live Development
 
-2. `.env`ファイルの作成:
-プロジェクトのルートディレクトリに`.env`ファイルを作成し、以下の内容を設定してください：
-```
-SWITCHBOT_TOKEN=あなたのSwitchBotトークン
-SECRET=あなたのSwitchBotシークレット
-```
+To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
+server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
+and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
+to this in your browser, and you can call your Go code from devtools.
 
-## 実行方法
+## Building
 
-以下のコマンドでプログラムを実行できます：
-
-```bash
-go run switchbot_aaa.go
-```
-
-## 機能
-
-- SwitchBotデバイス一覧の取得
-- API認証の自動処理
-- レスポンスのJSON形式での表示
+To build a redistributable, production mode package, use `wails build`.
