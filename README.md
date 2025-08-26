@@ -19,3 +19,5 @@ to this in your browser, and you can call your Go code from devtools.
 ## Building
 
 To build a redistributable, production mode package, use `wails build`.
+
+Windows用には`wails build -platform windows`を実行して`build/bin/go-switchbot-controller.exe`をダブルクリック
