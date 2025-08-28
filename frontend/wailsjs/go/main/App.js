@@ -6,6 +6,14 @@ export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
+export function HandleCeilingLight() {
+  return window['go']['main']['App']['HandleCeilingLight']();
+}
+
+export function HandleTv() {
+  return window['go']['main']['App']['HandleTv']();
+}
+
 export function SleepNow() {
   return window['go']['main']['App']['SleepNow']();
 }

@@ -1,0 +1,47 @@
+.controller-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.controller-container h1 {
+    margin-bottom: 20px;
+}
+
+.controller-container p {
+    margin-bottom: 40px;
+}
+
+.button-grid {
+    display: flex;
+    gap: 40px;
+}
+
+.control-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    background-color: #4a5b74;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.control-button:hover {
+    background-color: #5a6b84;
+}
+
+.control-button .icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}

@@ -3,4 +3,8 @@
 
 export function Greet(arg1:string):Promise<string>;
 
+export function HandleCeilingLight():Promise<void>;
+
+export function HandleTv():Promise<void>;
+
 export function SleepNow():Promise<string>;

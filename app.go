@@ -41,3 +41,13 @@ func (a *App) SleepNow() string {
 	exec.Command("powercfg", "-h", "on").Run()
 	return "PCをスリープさせました。"
 }
+
+// HandleCeilingLight is a placeholder function for ceiling light control.
+func (a *App) HandleCeilingLight() {
+	// 今後の実装のために空の関数を用意
+}
+
+// HandleTv is a placeholder function for TV control.
+func (a *App) HandleTv() {
+	// 今後の実装のために空の関数を用意
+}
