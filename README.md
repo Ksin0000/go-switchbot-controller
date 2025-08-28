@@ -44,3 +44,10 @@ locale -a
 # フォントをインストール fonts-takao などでも良い
 sudo apt install fonts-noto-cjk
 ```
+
+## やったコマンドメモ
+``` bash
+npm install react-router-dom
+
+npm install react-icons
+```
