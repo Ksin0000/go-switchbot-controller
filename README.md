@@ -45,6 +45,8 @@ locale -a
 sudo apt install fonts-noto-cjk
 ```
 
+でも結局[NotoSansJP-Regular.woff2](frontend/src/assets/fonts/NotoSansJP-Regular.woff2)をダウンロードしてきて解決した。
+
 ## やったコマンドメモ
 ``` bash
 npm install react-router-dom
