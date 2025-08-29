@@ -24,11 +24,11 @@ function SwitchBotController() {
             <p>{message}</p>
             <div className="button-grid">
                 <button className="control-button" onClick={handleCeilingLightClick}>
-                    {/*<span className="icon"><GiCeilingLight /></span>*/}
+                    <span className="icon"><GiCeilingLight /></span>
                     <span>シーリングライト</span>
                 </button>
                 <button className="control-button" onClick={handleTvClick}>
-                    {/*<span className="icon"><LuTv /></span>*/}
+                    <span className="icon"><LuTv /></span>
                     <span>テレビ</span>
                 </button>
             </div>
