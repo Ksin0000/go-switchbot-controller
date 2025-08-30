@@ -2,6 +2,14 @@
 
 GoのWailsを使ってスイッチボットを操作したり、windowsをスリープしたりする。
 
+## 実行方法
+
+1.  プロジェクトのルートに `.env` ファイルを作成し、SwitchBotのトークンとシークレットを記述します。
+    ```
+    SWITCHBOT_TOKEN=your_token_here
+    SECRET=your_secret_here
+    ```
+
 ## About
 
 This is the official Wails React-TS template.
@@ -50,6 +58,8 @@ sudo apt install fonts-noto-cjk
 ## やったコマンドメモ
 ``` bash
 npm install react-router-dom
-
 npm install react-icons
 ```
+
+
+:TODO スイッチボット画面に遷移したときにハンドシェイクして、その状態を表示しつつ保持しつつ、ボタンが押されたときの動作を作る
