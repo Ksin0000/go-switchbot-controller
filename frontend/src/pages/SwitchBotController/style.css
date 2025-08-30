@@ -14,38 +14,6 @@
     margin-bottom: 40px;
 }
 
-.button-grid {
-    display: flex;
-    gap: 40px;
-}
-
-.control-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 120px;
-    height: 120px;
-    border-radius: 20px;
-    background-color: #4a5b74;
-    color: white;
-    text-decoration: none;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 1rem;
-}
-
-.control-button:hover {
-    background-color: #5a6b84;
-}
-
-.control-button .icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
-
 .device-list {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -60,10 +28,60 @@
 }
 
 .device-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background-color: #4a5b74;
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 5px;
+}
+
+.device-name-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.list-icon {
+    font-size: 1.2rem;
+}
+
+.remote-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.remote-buttons button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3a4b64;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.remote-buttons button:hover {
+    background-color: #5a6b84;
+}
+
+.batch-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3a4b64;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 1rem;
+}
+
+.batch-button:hover {
+    background-color: #5a6b84;
 }
 
 .error-message {

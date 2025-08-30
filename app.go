@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-
+	"strings"
 	"github.com/nasa9084/go-switchbot/v4"
 )
 
@@ -49,21 +49,66 @@ func (a *App) SleepNow() string {
 	return "PCをスリープさせました。"
 }
 
-// GetDeviceList returns a list of SwitchBot devices.
-func (a *App) GetDeviceList() ([]switchbot.Device, error) {
-	devices, _, err := a.client.Device().List(a.ctx)
+// DeviceLists holds both physical and virtual devices.
+type DeviceLists struct {
+	Devices         []switchbot.Device        `json:"devices"`
+	InfraredRemotes []switchbot.InfraredDevice `json:"infraredRemotes"`
+}
+
+// GetAllDeviceLists returns lists of all SwitchBot devices.
+func (a *App) GetAllDeviceLists() (DeviceLists, error) {
+	devices, virtualDevices, err := a.client.Device().List(a.ctx)
 	if err != nil {
-		return nil, err
+		return DeviceLists{}, err
 	}
-	return devices, nil
+	return DeviceLists{Devices: devices, InfraredRemotes: virtualDevices}, nil
 }
 
-// HandleCeilingLight is a placeholder function for ceiling light control.
-func (a *App) HandleCeilingLight() {
-	// 今後の実装のために空の関数を用意
+// ControlInfraredRemote sends a command to a virtual infrared remote device.
+func (a *App) ControlInfraredRemote(deviceID string, command string) error {
+	//_, err := a.client.InfraredDevice(deviceID).Command(a.ctx, command, "")
+	//if err != nil {
+	//	return fmt.Errorf("failed to send command to device %s: %w", deviceID, err)
+	//}
+	return nil
 }
 
-// HandleTv is a placeholder function for TV control.
-func (a *App) HandleTv() {
-	// 今後の実装のために空の関数を用意
+func (a *App) TurnLight(deviceID string, command string) error {
+	err := a.client.Device().Command(a.ctx, deviceID, switchbot.TurnOnCommand())
+	if err != nil {
+		return fmt.Errorf("failed to send command to device %s: %w", deviceID, err)
+	}
+	return err
+}
+
+// TurnFirstLight finds the first infrared remote of type "Light" and turns it on.
+func (a *App) TurnFirstLight() (string, error) {
+	// 1. Get all device lists
+	_, virtualDevices, err := a.client.Device().List(a.ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get device list: %w", err)
+	}
+
+	// 2. Find the first light
+	var lightDeviceID string
+	var lightDeviceName string
+	for _, dev := range virtualDevices {
+		if strings.Contains(string(dev.Type), string(switchbot.Light)) {
+			lightDeviceID = dev.ID
+			lightDeviceName = dev.Name
+			break
+		}
+	}
+
+	if lightDeviceID == "" {
+		return "照明タイプの赤外線リモコンが見つかりませんでした。", nil
+	}
+
+	// 3. Send the "turnOn" command
+	err = a.TurnLight(lightDeviceID, "turnOn")
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s をオンにしました。", lightDeviceName), nil
 }
