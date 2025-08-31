@@ -53,13 +53,10 @@ locale -a
 sudo apt install fonts-noto-cjk
 ```
 
-でも結局[NotoSansJP-Regular.woff2](frontend/src/assets/fonts/NotoSansJP-Regular.woff2)をダウンロードしてきて解決した。
+でも結局[NotoSansJP-Regular.woff2](frontend/src/assets/fonts/NotoSansJP-Regular.woff2)をダウンロードしてきて解決したので上記の操作いらないかも。
 
 ## やったコマンドメモ
 ``` bash
 npm install react-router-dom
 npm install react-icons
 ```
-
-
-:TODO スイッチボット画面に遷移したときにハンドシェイクして、その状態を表示しつつ保持しつつ、ボタンが押されたときの動作を作る
