@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import '../../App.css'; // 共通スタイルをインポート
-import { MdPowerSettingsNew } from 'react-icons/md';
+import { MdPowerSettingsNew, MdOpenInFull, MdCloseFullscreen } from 'react-icons/md';
 import './style.css';
 import { GetAllDeviceLists, ControlInfraredRemote, TurnFirstLight} from '../../../wailsjs/go/main/App';
 import { main, switchbot } from '../../../wailsjs/go/models';
@@ -16,7 +16,6 @@ interface CombinedDevice {
     name: string;
     type: 'physical' | 'infrared';
     deviceType: string;
-    isControllable: boolean;
 }
 
 function SwitchBotController() {
@@ -45,7 +44,6 @@ function SwitchBotController() {
                     name: d.deviceName,
                     type: 'physical',
                     deviceType: d.deviceType,
-                    isControllable: false,
                 }));
 
                 const remotes: CombinedDevice[] = deviceLists.infraredRemotes.map(r => ({
@@ -53,7 +51,6 @@ function SwitchBotController() {
                     name: r.deviceName,
                     type: 'infrared',
                     deviceType: r.remoteType,
-                    isControllable: r.remoteType === 'TV' || r.remoteType === 'Light',
                 }));
 
                 setAllDevices([...physicals, ...remotes]);
@@ -104,16 +101,44 @@ function SwitchBotController() {
                                         {device.name}
                                         <span className="device-type-label">({device.type === 'physical' ? '物理' : '赤外線'}: {device.deviceType})</span>
                                     </span>
-                                    {device.isControllable && (
-                                        <div className="remote-buttons">
-                                            <button onClick={() => handleRemoteControl(device.id, 'turnOn', device.name)} title="オン">
-                                                <MdPowerSettingsNew /> オン
+                                    <div className="remote-buttons">
+                                        {(device.deviceType.includes('Hub')) && (
+                                            <>ここに湿度、温度、照度を表示する</>
+                                        )}
+                                        {(device.type === 'infrared' && (device.deviceType.includes('Light'))) && (
+                                            <button onClick={() => { addLog("ボタンの動作は未実装") }} title="電源">
+                                                <MdPowerSettingsNew />
                                             </button>
-                                            <button onClick={() => handleRemoteControl(device.id, 'turnOff', device.name)} title="オフ">
-                                                <MdPowerSettingsNew /> オフ
+                                        )}
+                                        {(device.type === 'infrared' && (device.deviceType.includes('TV'))) && (
+                                            <button onClick={() => { addLog("ボタンの動作は未実装") }} title="電源">
+                                                <MdPowerSettingsNew />
                                             </button>
-                                        </div>
-                                    )}
+                                        )}
+                                        {(device.type === 'infrared' && (device.deviceType.includes('Air Conditioner'))) && (
+                                            <>
+                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="温度↑">
+                                                    <>↑</>
+                                                </button>
+                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="温度↓">
+                                                    <>↓</>
+                                                </button>
+                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="電源">
+                                                    <MdPowerSettingsNew />
+                                                </button>
+                                            </>
+                                        )}
+                                        {device.deviceType.includes('Curtain') && (
+                                            <>
+                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="開ける">
+                                                    <MdOpenInFull /> 開ける
+                                                </button>
+                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="閉める">
+                                                    <MdCloseFullscreen /> 閉める
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </li>
                             ))}
                         </ul>
