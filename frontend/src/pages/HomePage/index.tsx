@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { FaBed, FaRobot } from 'react-icons/fa';
-import { CgSleep, CgDebug } from 'react-icons/cg';
+import { GiNightSleep } from "react-icons/gi";
+import { CgDebug } from 'react-icons/cg';
+import { TbDevicesPcOff } from "react-icons/tb";
+import { TbSquareLetterSFilled } from "react-icons/tb";
 import './style.css';
 
 function Home() {
@@ -9,15 +11,15 @@ function Home() {
             <h1>Go SwitchBot Controller</h1>
             <div className="app-grid">
                 <Link to="/sleep-timer" className="app-icon">
-                    <span className="icon"><FaBed /></span>
+                    <span className="icon"><TbDevicesPcOff /></span>
                     <span>PCスリープ</span>
                 </Link>
                 <Link to="/switchbot" className="app-icon">
-                    <span className="icon"><FaRobot /></span>
+                    <span className="icon"><TbSquareLetterSFilled /></span>
                     <span>SwitchBot操作</span>
                 </Link>
                 <Link to="/get-ready-for-sleep" className="app-icon">
-                    <span className="icon"><CgSleep /></span>
+                    <span className="icon"><GiNightSleep /></span>
                     <span>寝る準備</span>
                 </Link>
                 <Link to="/debug" className="app-icon">
