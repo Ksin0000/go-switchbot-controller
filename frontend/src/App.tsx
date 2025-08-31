@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Home from './pages/Home';
+import HomePage from './pages/HomePage';
 import SleepTimer from './pages/SleepTimer';
 import SwitchBotController from './pages/SwitchBotController';
 import GetReadyForSleep from './pages/GetReadyForSleep';
@@ -13,7 +13,7 @@ function App() {
         <div id="app">
             <ErrorBoundary>
                 <Routes>
-                  <Route path="/" element={<Home/>}/>
+                  <Route path="/" element={<HomePage/>}/>
                   <Route element={<Layout />}>
                     <Route path="/sleep-timer" element={<SleepTimer/>}/>
                     <Route path="/switchbot" element={<SwitchBotController/>}/>
