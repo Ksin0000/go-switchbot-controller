@@ -25,6 +25,8 @@ func (a *App) Greet(name string) string { return fmt.Sprintf("Hello %s, It's sho
 
 // SleepNow はPCを即時スリープさせます（内部実装に委譲）
 func (a *App) SleepNow() string { return appcore.SleepNow() }
+// ShutdownNow はPCを即時シャットダウンします（内部実装に委譲）
+func (a *App) ShutdownNow() string { return appcore.ShutdownNow() }
 
 // DeviceLists holds both physical and virtual devices.
 type DeviceLists struct {
@@ -65,3 +67,11 @@ func (a *App) TurnLight(deviceID string, _ string) error {
 
 // TurnFirstLight finds the first infrared remote of type "Light" and turns it on.
 func (a *App) TurnFirstLight() (string, error) { return a.svc.TurnFirstLight(a.ctx) }
+
+// TurnOffDevice turns off a physical device by ID.
+func (a *App) TurnOffDevice(deviceID string) error {
+    if err := a.svc.DeviceTurnOff(a.ctx, deviceID); err != nil {
+        return fmt.Errorf("failed to send off command to device %s: %w", deviceID, err)
+    }
+    return nil
+}

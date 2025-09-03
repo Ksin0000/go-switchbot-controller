@@ -14,3 +14,8 @@ func SleepNow() string {
     return "PCをスリープさせました。"
 }
 
+// ShutdownNow shuts down Windows immediately.
+func ShutdownNow() string {
+    exec.Command("shutdown", "/s", "/f", "/t", "0").Run()
+    return "PCの電源をオフにします。"
+}

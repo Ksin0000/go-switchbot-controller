@@ -81,6 +81,50 @@ func (s *Service) LightTurnOn(ctx context.Context, deviceID string) error {
     return s.client.TurnOnDevice(ctx, deviceID)
 }
 
+// DeviceTurnOff turns off a physical device (e.g., Plug, Bot if supported).
+func (s *Service) DeviceTurnOff(ctx context.Context, deviceID string) error {
+    if err := s.ensureClient(); err != nil {
+        return err
+    }
+    return s.client.TurnOffDevice(ctx, deviceID)
+}
+
+// PowerOffDevices sends power-off to selected devices.
+// - infraredMap: map[deviceID]command (e.g., "turnOff" or custom learned button name)
+// - physicalIDs: slice of physical device IDs to turn off
+func (s *Service) PowerOffDevices(ctx context.Context, infraredMap map[string]string, physicalIDs []string) error {
+    if err := s.ensureClient(); err != nil {
+        return err
+    }
+
+    // IR first
+    for id, cmd := range infraredMap {
+        if strings.TrimSpace(cmd) == "" {
+            cmd = "turnOff"
+        }
+        req := sb.DeviceCommandRequest{Command: cmd, Parameter: "default", CommandType: "command"}
+        if err := s.client.SendRawCommand(ctx, id, req); err != nil {
+            // Fallback to customize
+            if strings.Contains(err.Error(), "command is not supported") {
+                req.CommandType = "customize"
+                if err2 := s.client.SendRawCommand(ctx, id, req); err2 != nil {
+                    return fmt.Errorf("IRコマンド送信失敗（customize）: %w", err2)
+                }
+            } else {
+                return fmt.Errorf("IRコマンド送信失敗: %w", err)
+            }
+        }
+    }
+
+    // Physical next
+    for _, id := range physicalIDs {
+        if err := s.client.TurnOffDevice(ctx, id); err != nil {
+            return fmt.Errorf("物理デバイスOFF失敗(%s): %w", id, err)
+        }
+    }
+    return nil
+}
+
 // TurnFirstLight finds the first infrared remote of type "Light" and turns it on.
 func (s *Service) TurnFirstLight(ctx context.Context) (string, error) {
     if err := s.ensureClient(); err != nil {
