@@ -1,24 +1,24 @@
 package main
 
 import (
-	"embed"
-	"log"
+    "embed"
+    "log"
 
-	"github.com/joho/godotenv"
-	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+    "github.com/joho/godotenv"
+    "github.com/wailsapp/wails/v2"
+    "github.com/wailsapp/wails/v2/pkg/options"
+    "github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
 func main() {
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found. SWITCHBOT_TOKEN and SECRET must be set in the environment.")
-	}
+    // Load .env file
+    err := godotenv.Load()
+    if err != nil {
+        log.Println("Warning: .env file not found. SWITCHBOT_TOKEN and SECRET must be set in the environment.")
+    }
 
 	// Create an instance of the app structure
 	app := NewApp()

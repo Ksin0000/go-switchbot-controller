@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import '../../App.css'; // 共通スタイルをインポート
 import { MdPowerSettingsNew, MdOpenInFull, MdCloseFullscreen } from 'react-icons/md';
 import './style.css';
-import { GetAllDeviceLists, ControlInfraredRemote, TurnFirstLight} from '../../../wailsjs/go/main/App';
+import { InitSwitchBotAndFetchDevices, ControlInfraredRemote, TurnFirstLight } from '../../../wailsjs/go/main/App';
 import { main, switchbot } from '../../../wailsjs/go/models';
 
 interface LogEntry {
@@ -35,9 +35,9 @@ function SwitchBotController() {
     useEffect(() => {
         const fetchAllDevices = async () => {
             setIsLoading(true);
-            addLog('デバイスリストを取得中...');
+            addLog('SwitchBotの初期化を開始します...');
             try {
-                const deviceLists: main.DeviceLists = await GetAllDeviceLists();
+                const deviceLists: main.DeviceLists = await InitSwitchBotAndFetchDevices();
 
                 const physicals: CombinedDevice[] = deviceLists.devices.map(d => ({
                     id: d.deviceId,
@@ -54,9 +54,14 @@ function SwitchBotController() {
                 }));
 
                 setAllDevices([...physicals, ...remotes]);
+                if (!sessionStorage.getItem('SB_AUTH_LOGGED')) {
+                    addLog('SwitchBotの認証情報を確認しました。');
+                    addLog('SwitchBot APIへの接続を確認しました。');
+                    sessionStorage.setItem('SB_AUTH_LOGGED', '1');
+                }
                 addLog('デバイスリストを取得しました。');
             } catch (err: any) {
-                addLog(`デバイスリストの取得に失敗しました: ${err.message || String(err)}`, 'error');
+                addLog(`${err?.message || String(err)}`, 'error');
             } finally {
                 setIsLoading(false);
             }

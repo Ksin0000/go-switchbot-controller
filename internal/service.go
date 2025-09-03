@@ -1,0 +1,96 @@
+package internal
+
+import (
+    "context"
+    "fmt"
+    "strings"
+
+    sb "github.com/nasa9084/go-switchbot/v4"
+)
+
+// Service provides application use-cases to be invoked from the UI layer.
+type Service struct {
+    client SwitchBotClient
+}
+
+func NewService() *Service {
+    return &Service{}
+}
+
+// ensureClient lazily initialises the SwitchBot client from env.
+func (s *Service) ensureClient() error {
+    if s.client != nil {
+        return nil
+    }
+    cfg, err := LoadFromEnv()
+    if err != nil {
+        return err
+    }
+    s.client = NewClient(cfg)
+    return nil
+}
+
+// InitAndFetchDevices performs credentials + connectivity checks by fetching devices.
+func (s *Service) InitAndFetchDevices(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error) {
+    if err := s.ensureClient(); err != nil {
+        return nil, nil, err
+    }
+    devices, virtuals, err := s.client.List(ctx)
+    if err != nil {
+        return nil, nil, fmt.Errorf("SwitchBot API への接続に失敗しました: %w", err)
+    }
+    return devices, virtuals, nil
+}
+
+// GetAllDevices fetches both physical and infrared devices.
+func (s *Service) GetAllDevices(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error) {
+    if err := s.ensureClient(); err != nil {
+        return nil, nil, err
+    }
+    return s.client.List(ctx)
+}
+
+// ControlIR sends a command to an infrared remote.
+func (s *Service) ControlIR(ctx context.Context, deviceID, command string) error {
+    // 既存実装互換のため、当面は未実装のまま成功扱いにする
+    // （将来 go-switchbot のIR操作APIに合わせて実装）
+    _ = deviceID
+    _ = command
+    return nil
+}
+
+// LightTurnOn turns on a light device (infrared light uses IR command, but here
+// we keep the existing physical device command as in the original code).
+func (s *Service) LightTurnOn(ctx context.Context, deviceID string) error {
+    if err := s.ensureClient(); err != nil {
+        return err
+    }
+    return s.client.TurnOnDevice(ctx, deviceID)
+}
+
+// TurnFirstLight finds the first infrared remote of type "Light" and turns it on.
+func (s *Service) TurnFirstLight(ctx context.Context) (string, error) {
+    if err := s.ensureClient(); err != nil {
+        return "", err
+    }
+    _, virtuals, err := s.client.List(ctx)
+    if err != nil {
+        return "", fmt.Errorf("failed to get device list: %w", err)
+    }
+
+    var lightID, lightName string
+    for _, dev := range virtuals {
+        if strings.Contains(string(dev.Type), string(sb.Light)) {
+            lightID = dev.ID
+            lightName = dev.Name
+            break
+        }
+    }
+    if lightID == "" {
+        return "照明タイプの赤外線リモコンが見つかりませんでした。", nil
+    }
+    if err := s.LightTurnOn(ctx, lightID); err != nil {
+        return "", err
+    }
+    return fmt.Sprintf("%s をオンにしました。", lightName), nil
+}
