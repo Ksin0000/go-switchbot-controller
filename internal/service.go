@@ -52,10 +52,23 @@ func (s *Service) GetAllDevices(ctx context.Context) ([]sb.Device, []sb.Infrared
 
 // ControlIR sends a command to an infrared remote.
 func (s *Service) ControlIR(ctx context.Context, deviceID, command string) error {
-    // 既存実装互換のため、当面は未実装のまま成功扱いにする
-    // （将来 go-switchbot のIR操作APIに合わせて実装）
-    _ = deviceID
-    _ = command
+    if err := s.ensureClient(); err != nil {
+        return err
+    }
+
+    // 1st: 標準コマンドとして送信（commandType: "command"）
+    req := sb.DeviceCommandRequest{Command: command, Parameter: "default", CommandType: "command"}
+    if err := s.client.SendRawCommand(ctx, deviceID, req); err != nil {
+        // 未対応の場合は customize で再送（学習リモコンのボタン名）
+        if strings.Contains(err.Error(), "command is not supported") {
+            req.CommandType = "customize"
+            if err2 := s.client.SendRawCommand(ctx, deviceID, req); err2 != nil {
+                return fmt.Errorf("IRコマンド送信失敗（customize）: %w", err2)
+            }
+            return nil
+        }
+        return fmt.Errorf("IRコマンド送信失敗: %w", err)
+    }
     return nil
 }
 

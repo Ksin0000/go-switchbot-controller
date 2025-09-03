@@ -10,6 +10,7 @@ import (
 type SwitchBotClient interface {
     List(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error)
     TurnOnDevice(ctx context.Context, deviceID string) error
+    SendRawCommand(ctx context.Context, deviceID string, req sb.DeviceCommandRequest) error
 }
 
 // sbClient is the concrete implementation using the upstream library.
@@ -24,4 +25,8 @@ func (c *sbClient) List(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, 
 
 func (c *sbClient) TurnOnDevice(ctx context.Context, deviceID string) error {
     return c.raw.Device().Command(ctx, deviceID, sb.TurnOnCommand())
+}
+
+func (c *sbClient) SendRawCommand(ctx context.Context, deviceID string, req sb.DeviceCommandRequest) error {
+    return c.raw.Device().Command(ctx, deviceID, req)
 }

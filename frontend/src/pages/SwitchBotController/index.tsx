@@ -80,6 +80,27 @@ function SwitchBotController() {
         }
     };
 
+    // TV電源コマンド名の取得/設定（総当たりなし）
+    const getTVPowerCommand = (deviceId: string): string => {
+        const v = localStorage.getItem(`tv_power_cmd:${deviceId}`);
+        return v && v.trim().length > 0 ? v : 'turnOn';
+    };
+
+    const configureTVPowerCommand = (deviceId: string, deviceName: string) => {
+        const key = `tv_power_cmd:${deviceId}`;
+        const current = getTVPowerCommand(deviceId);
+        const next = window.prompt(`${deviceName} の電源コマンド名を入力してください`, current);
+        if (next == null) return; // キャンセル
+        const val = next.trim();
+        if (val.length === 0) {
+            localStorage.removeItem(key);
+            addLog(`${deviceName} の電源コマンド名をデフォルト(Power)に戻しました。`);
+        } else {
+            localStorage.setItem(key, val);
+            addLog(`${deviceName} の電源コマンド名を「${val}」に設定しました。`);
+        }
+    };
+
     const handleTurnOnFirstLightClick = async () => {
         try {
             addLog('最初の照明をオンにしています...');
@@ -108,17 +129,26 @@ function SwitchBotController() {
                                     </span>
                                     <div className="remote-buttons">
                                         {(device.deviceType.includes('Hub')) && (
-                                            <>ここに湿度、温度、照度を表示する</>
+                                            <>
+                                                ここに湿度、温度、照度を表示する
+                                            </>
                                         )}
                                         {(device.type === 'infrared' && (device.deviceType.includes('Light'))) && (
-                                            <button onClick={() => { addLog("ボタンの動作は未実装") }} title="電源">
-                                                <MdPowerSettingsNew />
-                                            </button>
+                                            <>
+                                                <button onClick={() => handleRemoteControl(device.id, "turnOn", device.name)} title="電源">
+                                                    <MdPowerSettingsNew />
+                                                </button>
+                                            </>
                                         )}
                                         {(device.type === 'infrared' && (device.deviceType.includes('TV'))) && (
-                                            <button onClick={() => { addLog("ボタンの動作は未実装") }} title="電源">
-                                                <MdPowerSettingsNew />
-                                            </button>
+                                            <>
+                                                <button
+                                                    onClick={() => handleRemoteControl(device.id, "turnOn", device.name)}
+                                                    title="電源"
+                                                >
+                                                    <MdPowerSettingsNew />
+                                                </button>
+                                            </>
                                         )}
                                         {(device.type === 'infrared' && (device.deviceType.includes('Air Conditioner'))) && (
                                             <>
@@ -128,7 +158,7 @@ function SwitchBotController() {
                                                 <button onClick={() => { addLog("ボタンの動作は未実装") }} title="温度↓">
                                                     <>↓</>
                                                 </button>
-                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="電源">
+                                                <button onClick={() => handleRemoteControl(device.id, "turnOn", device.name)} title="電源">
                                                     <MdPowerSettingsNew />
                                                 </button>
                                             </>
