@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import '../../App.css'; // 共通スタイルをインポート
 import { MdPowerSettingsNew, MdOpenInFull, MdCloseFullscreen } from 'react-icons/md';
 import './style.css';
-import { InitSwitchBotAndFetchDevices, ControlInfraredRemote, TurnFirstLight } from '../../../wailsjs/go/main/App';
-import { main, switchbot } from '../../../wailsjs/go/models';
+import { InitSwitchBotAndFetchDevices, ControlInfraredRemote } from '../../../wailsjs/go/main/App';
+import { main } from '../../../wailsjs/go/models';
 
 interface LogEntry {
     timestamp: string;
@@ -80,37 +80,6 @@ function SwitchBotController() {
         }
     };
 
-    // TV電源コマンド名の取得/設定（総当たりなし）
-    const getTVPowerCommand = (deviceId: string): string => {
-        const v = localStorage.getItem(`tv_power_cmd:${deviceId}`);
-        return v && v.trim().length > 0 ? v : 'turnOn';
-    };
-
-    const configureTVPowerCommand = (deviceId: string, deviceName: string) => {
-        const key = `tv_power_cmd:${deviceId}`;
-        const current = getTVPowerCommand(deviceId);
-        const next = window.prompt(`${deviceName} の電源コマンド名を入力してください`, current);
-        if (next == null) return; // キャンセル
-        const val = next.trim();
-        if (val.length === 0) {
-            localStorage.removeItem(key);
-            addLog(`${deviceName} の電源コマンド名をデフォルト(Power)に戻しました。`);
-        } else {
-            localStorage.setItem(key, val);
-            addLog(`${deviceName} の電源コマンド名を「${val}」に設定しました。`);
-        }
-    };
-
-    const handleTurnOnFirstLightClick = async () => {
-        try {
-            addLog('最初の照明をオンにしています...');
-            const resultMessage = await TurnFirstLight();
-            addLog(resultMessage);
-        } catch (err: any) {
-            addLog(`照明の操作に失敗しました: ${err.message || String(err)}`, 'error');
-        }
-    };
-
     return (
         <div className="page-container">
             <div className="main-content">
@@ -180,12 +149,6 @@ function SwitchBotController() {
                     ) : (
                         <p>デバイスが見つかりません。</p>
                     )}
-                </div>
-                <div className="device-list">
-                    <h2>一括操作</h2>
-                    <button className="batch-button" onClick={handleTurnOnFirstLightClick}>
-                        最初の照明をオンにする
-                    </button>
                 </div>
             </div>
             <div className="log-panel">

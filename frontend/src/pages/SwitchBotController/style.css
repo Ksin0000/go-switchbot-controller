@@ -118,18 +118,3 @@
 .remote-buttons button:hover {
     background-color: #5a6b84;
 }
-
-.batch-button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    background-color: #3a4b64;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    font-size: 1rem;
-}
-
-.batch-button:hover {
-    background-color: #5a6b84;
-}

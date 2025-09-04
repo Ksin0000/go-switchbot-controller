@@ -20,4 +20,3 @@ func LoadFromEnv() (Config, error) {
     }
     return Config{Token: token, Secret: secret}, nil
 }
-
