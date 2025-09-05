@@ -85,6 +85,19 @@
     margin-bottom: 5px;
 }
 
+/* 詳細トグル対応の行レイアウト */
+.device-list li.device-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.device-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .device-name-container {
     display: flex;
     align-items: center;
@@ -117,4 +130,54 @@
 
 .remote-buttons button:hover {
     background-color: #5a6b84;
+}
+
+.details-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: none;
+    background: #3a4b64;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 6px;
+}
+
+.device-details {
+    background-color: #3a4b64;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.ac-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    align-items: center;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.form-row input[type="number"],
+.form-row select {
+    width: 100px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.detail-empty {
+    color: #cfd8e3;
+    font-size: 0.9rem;
 }

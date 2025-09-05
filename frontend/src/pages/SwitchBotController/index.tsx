@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import '../../App.css'; // 共通スタイルをインポート
-import { MdPowerSettingsNew, MdOpenInFull, MdCloseFullscreen } from 'react-icons/md';
+import { MdPowerSettingsNew, MdOpenInFull, MdCloseFullscreen, MdExpandMore, MdExpandLess } from 'react-icons/md';
 import './style.css';
 import { InitSwitchBotAndFetchDevices, ControlInfraredRemote } from '../../../wailsjs/go/main/App';
 import { main } from '../../../wailsjs/go/models';
@@ -18,10 +18,16 @@ interface CombinedDevice {
     deviceType: string;
 }
 
+type AirconMode = 1 | 2 | 3 | 4 | 5; // 1:auto, 2:cool, 3:dry, 4:fan, 5:heat
+type FanSpeed = 1 | 2 | 3 | 4; // 1:auto, 2:low, 3:medium, 4:high
+interface AirconSetting { temperature: number; mode: AirconMode; fanSpeed: FanSpeed; power: 'on' | 'off'; }
+
 function SwitchBotController() {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [allDevices, setAllDevices] = useState<CombinedDevice[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [acSettings, setAcSettings] = useState<Record<string, AirconSetting>>({});
+    const [detailsOpen, setDetailsOpen] = useState<Record<string, boolean>>({});
 
     const addLog = (message: string, type: 'info' | 'error' = 'info') => {
         const newLog: LogEntry = {
@@ -54,6 +60,16 @@ function SwitchBotController() {
                 }));
 
                 setAllDevices([...physicals, ...remotes]);
+                // ACデバイスに初期値を設定
+                const initAC: Record<string, AirconSetting> = {};
+                remotes.filter(r => r.deviceType.includes('Air Conditioner')).forEach(r => {
+                    initAC[r.id] = { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' };
+                });
+                setAcSettings(prev => ({ ...initAC, ...prev }));
+                // 詳細パネルの初期状態（全て閉）
+                const initDetails: Record<string, boolean> = {};
+                [...physicals, ...remotes].forEach(d => { initDetails[d.id] = false; });
+                setDetailsOpen(prev => ({ ...initDetails, ...prev }));
                 if (!sessionStorage.getItem('SB_AUTH_LOGGED')) {
                     addLog('SwitchBotの認証情報を確認しました。');
                     addLog('SwitchBot APIへの接続を確認しました。');
@@ -80,6 +96,16 @@ function SwitchBotController() {
         }
     };
 
+    const handleAirconSend = (device: CombinedDevice) => {
+        const st = acSettings[device.id] || { temperature: 26, mode: 1 as AirconMode, fanSpeed: 1 as FanSpeed, power: 'on' as const };
+        const param = `${st.temperature},${st.mode},${st.fanSpeed},${st.power}`;
+        handleRemoteControl(device.id, `setAll:${param}`, device.name);
+    };
+
+    const toggleDetails = (deviceId: string) => {
+        setDetailsOpen(prev => ({ ...prev, [deviceId]: !prev[deviceId] }));
+    };
+
     return (
         <div className="page-container">
             <div className="main-content">
@@ -91,58 +117,126 @@ function SwitchBotController() {
                     ) : allDevices.length > 0 ? (
                         <ul>
                             {allDevices.map((device) => (
-                                <li key={device.id}>
-                                    <span className="device-name-container">
-                                        {device.name}
-                                        <span className="device-type-label">({device.type === 'physical' ? '物理' : '赤外線'}: {device.deviceType})</span>
-                                    </span>
-                                    <div className="remote-buttons">
-                                        {(device.deviceType.includes('Hub')) && (
-                                            <>
-                                                ここに湿度、温度、照度を表示する
-                                            </>
+                                <li key={device.id} className="device-item">
+                                    <div className="device-row">
+                                        <span className="device-name-container">
+                                            <button
+                                                className="details-toggle"
+                                                aria-expanded={!!detailsOpen[device.id]}
+                                                onClick={() => toggleDetails(device.id)}
+                                                title={detailsOpen[device.id] ? '詳細を閉じる' : '詳細を開く'}
+                                            >
+                                                {detailsOpen[device.id] ? <MdExpandLess/> : <MdExpandMore/>}
+                                            </button>
+                                            {device.name}
+                                            <span className="device-type-label">({device.type === 'physical' ? '物理' : '赤外線'}: {device.deviceType})</span>
+                                        </span>
+                                        <div className="remote-buttons">
+                                            {(device.deviceType.includes('Hub')) && (
+                                                <>
+                                                    ここに湿度、温度、照度を表示する
+                                                </>
+                                            )}
+                                            {(device.type === 'infrared' && (device.deviceType.includes('Light'))) && (
+                                                <>
+                                                    <button onClick={() => handleRemoteControl(device.id, "turnOn", device.name)} title="電源">
+                                                        <MdPowerSettingsNew />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {(device.type === 'infrared' && (device.deviceType.includes('TV'))) && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleRemoteControl(device.id, "turnOn", device.name)}
+                                                        title="電源"
+                                                    >
+                                                        <MdPowerSettingsNew />
+                                                    </button>
+                                                </>
                                         )}
-                                        {(device.type === 'infrared' && (device.deviceType.includes('Light'))) && (
-                                            <>
-                                                <button onClick={() => handleRemoteControl(device.id, "turnOn", device.name)} title="電源">
-                                                    <MdPowerSettingsNew />
-                                                </button>
-                                            </>
-                                        )}
-                                        {(device.type === 'infrared' && (device.deviceType.includes('TV'))) && (
-                                            <>
-                                                <button
-                                                    onClick={() => handleRemoteControl(device.id, "turnOn", device.name)}
-                                                    title="電源"
-                                                >
-                                                    <MdPowerSettingsNew />
-                                                </button>
-                                            </>
-                                        )}
-                                        {(device.type === 'infrared' && (device.deviceType.includes('Air Conditioner'))) && (
-                                            <>
-                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="温度↑">
-                                                    <>↑</>
-                                                </button>
-                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="温度↓">
-                                                    <>↓</>
-                                                </button>
-                                                <button onClick={() => handleRemoteControl(device.id, "turnOn", device.name)} title="電源">
-                                                    <MdPowerSettingsNew />
-                                                </button>
-                                            </>
-                                        )}
-                                        {device.deviceType.includes('Curtain') && (
-                                            <>
-                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="開ける">
-                                                    <MdOpenInFull />
-                                                </button>
-                                                <button onClick={() => { addLog("ボタンの動作は未実装") }} title="閉める">
-                                                    <MdCloseFullscreen />
-                                                </button>
-                                            </>
-                                        )}
+                                            {device.deviceType.includes('Curtain') && (
+                                                <>
+                                                    <button onClick={() => { addLog("ボタンの動作は未実装") }} title="開ける">
+                                                        <MdOpenInFull />
+                                                    </button>
+                                                    <button onClick={() => { addLog("ボタンの動作は未実装") }} title="閉める">
+                                                        <MdCloseFullscreen />
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
+
+                                    {detailsOpen[device.id] && (
+                                        <div className="device-details">
+                                            {(device.type === 'infrared' && (device.deviceType.includes('Air Conditioner'))) ? (
+                                                <div className="ac-detail-grid">
+                                                    <label className="form-row">
+                                                        <span>温度</span>
+                                                        <input
+                                                            type="number"
+                                                            min={16}
+                                                            max={30}
+                                                            value={(acSettings[device.id]?.temperature ?? 26)}
+                                                            onChange={(e) => setAcSettings(prev => ({
+                                                                ...prev,
+                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), temperature: Number(e.target.value) }
+                                                            }))}
+                                                        />
+                                                    </label>
+                                                    <label className="form-row">
+                                                        <span>モード</span>
+                                                        <select
+                                                            value={(acSettings[device.id]?.mode ?? 1)}
+                                                            onChange={(e) => setAcSettings(prev => ({
+                                                                ...prev,
+                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), mode: Number(e.target.value) as AirconMode }
+                                                            }))}
+                                                        >
+                                                            <option value={1}>Auto(1)</option>
+                                                            <option value={2}>Cool(2)</option>
+                                                            <option value={3}>Dry(3)</option>
+                                                            <option value={4}>Fan(4)</option>
+                                                            <option value={5}>Heat(5)</option>
+                                                        </select>
+                                                    </label>
+                                                    <label className="form-row">
+                                                        <span>風量</span>
+                                                        <select
+                                                            value={(acSettings[device.id]?.fanSpeed ?? 1)}
+                                                            onChange={(e) => setAcSettings(prev => ({
+                                                                ...prev,
+                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), fanSpeed: Number(e.target.value) as FanSpeed }
+                                                            }))}
+                                                        >
+                                                            <option value={1}>Auto(1)</option>
+                                                            <option value={2}>Low(2)</option>
+                                                            <option value={3}>Medium(3)</option>
+                                                            <option value={4}>High(4)</option>
+                                                        </select>
+                                                    </label>
+                                                    <label className="form-row">
+                                                        <span>電源</span>
+                                                        <select
+                                                            value={(acSettings[device.id]?.power ?? 'on')}
+                                                            onChange={(e) => setAcSettings(prev => ({
+                                                                ...prev,
+                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), power: e.target.value as 'on' | 'off' }
+                                                            }))}
+                                                        >
+                                                            <option value={'on'}>ON</option>
+                                                            <option value={'off'}>OFF</option>
+                                                        </select>
+                                                    </label>
+                                                    <div className="form-actions">
+                                                        <button onClick={() => handleAirconSend(device)}>送信</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="detail-empty">このデバイスの詳細設定は未実装です。</div>
+                                            )}
+                                        </div>
+                                    )}
                                 </li>
                             ))}
                         </ul>

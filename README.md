@@ -10,6 +10,18 @@ GoのWailsを使ってスイッチボットを操作したり、windowsをスリ
     SECRET=your_secret_here
     ```
 
+## エアコン操作（IRリモコン: Virtual Infrared Remote）
+
+- 画面のデバイス一覧でリモコン種別が `Air Conditioner` の項目に、エアコン専用コントロール（温度/モード/風量/電源）を追加しました。
+- 「送信」ボタンで SwitchBot API の `setAll` コマンドを呼び出します。
+  - API パラメーター形式: `"{temperature},{mode},{fan speed},{power state}"`
+  - 例: `26,1,3,on`（26℃/Auto/Medium/電源ON）
+  - モード: 1=Auto, 2=Cool, 3=Dry, 4=Fan, 5=Heat
+  - 風量: 1=Auto, 2=Low, 3=Medium, 4=High
+  - 電源: `on` または `off`
+
+備考: アプリ内部では `setAll:26,1,3,on` のようなショートハンド文字列をUIから送信し、バックエンドで SwitchBot API の `command: setAll` に変換して送出しています。
+
 ## About
 
 This is the official Wails React-TS template.
@@ -29,4 +41,3 @@ to this in your browser, and you can call your Go code from devtools.
 To build a redistributable, production mode package, use `wails build`.
 
 Windows用には`wails build -platform windows`を実行して`build/bin/go-switchbot-controller.exe`をダブルクリック
-

@@ -55,6 +55,20 @@ func (s *SwitchBotService) ControlIR(ctx context.Context, deviceID, command stri
         return fmt.Errorf("無効なコマンドです（空文字）")
     }
 
+    // エアコン(setAll)のショートハンド: "setAll:26,1,3,on" の形式を許可
+    if strings.HasPrefix(cmd, "setAll:") {
+        param := strings.TrimPrefix(cmd, "setAll:")
+        // SwitchBot API仕様:
+        //   command: "setAll"
+        //   parameter: "{temperature},{mode},{fan speed},{power state}"
+        // 例: "26,1,3,on"
+        req := sb.DeviceCommandRequest{Command: "setAll", Parameter: param, CommandType: "command"}
+        if err := s.client.SendRawCommand(ctx, deviceID, req); err != nil {
+            return fmt.Errorf("IRエアコン(setAll)送信失敗: %w", err)
+        }
+        return nil
+    }
+
     // 1回目: 標準コマンドとして送信（commandType: "command"）
     req := sb.DeviceCommandRequest{Command: cmd, Parameter: "default", CommandType: "command"}
     if err := s.client.SendRawCommand(ctx, deviceID, req); err != nil {
