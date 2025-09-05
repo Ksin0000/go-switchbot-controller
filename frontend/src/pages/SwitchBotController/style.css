@@ -181,3 +181,39 @@
     color: #cfd8e3;
     font-size: 0.9rem;
 }
+
+/* 電源トグル */
+.power-toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 32px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    background: #3a3a3c; /* iOSオフに近い色（ダーク系）*/
+    transition: background-color 0.2s ease;
+    padding: 0; /* テキスト無し */
+}
+.power-toggle.on { background: #34c759; } /* iOSグリーン */
+.power-toggle.off { background: #3a3a3c; }
+
+.power-toggle::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 28px;
+    height: 28px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease;
+    will-change: transform;
+}
+.power-toggle.on::after { transform: translateX(20px); }
+
+.power-toggle:focus-visible {
+    outline: 2px solid #8ab4f8;
+    outline-offset: 2px;
+}

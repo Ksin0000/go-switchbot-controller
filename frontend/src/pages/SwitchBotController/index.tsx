@@ -153,7 +153,17 @@ function SwitchBotController() {
                                                         <MdPowerSettingsNew />
                                                     </button>
                                                 </>
-                                        )}
+                                            )}
+                                            {(device.type === 'infrared' && (device.deviceType.includes('Air Conditioner'))) && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleRemoteControl(device.id, "turnOn", device.name)}
+                                                        title="電源"
+                                                    >
+                                                        <MdPowerSettingsNew />
+                                                    </button>
+                                                </>
+                                            )}
                                             {device.deviceType.includes('Curtain') && (
                                                 <>
                                                     <button onClick={() => { addLog("ボタンの動作は未実装") }} title="開ける">
@@ -171,63 +181,71 @@ function SwitchBotController() {
                                         <div className="device-details">
                                             {(device.type === 'infrared' && (device.deviceType.includes('Air Conditioner'))) ? (
                                                 <div className="ac-detail-grid">
+                                                    {/* 電源（先頭・トグル） */}
                                                     <label className="form-row">
-                                                        <span>温度</span>
-                                                        <input
-                                                            type="number"
-                                                            min={16}
-                                                            max={30}
-                                                            value={(acSettings[device.id]?.temperature ?? 26)}
-                                                            onChange={(e) => setAcSettings(prev => ({
+                                                        <span>電源</span>
+                                                        <button
+                                                            className={`power-toggle ${((acSettings[device.id]?.power ?? 'on') === 'on') ? 'on' : 'off'}`}
+                                                            role="switch"
+                                                            aria-label="電源"
+                                                            aria-checked={(acSettings[device.id]?.power ?? 'on') === 'on'}
+                                                            onClick={() => setAcSettings(prev => ({
                                                                 ...prev,
-                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), temperature: Number(e.target.value) }
+                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), power: (prev[device.id]?.power ?? 'on') === 'on' ? 'off' : 'on' }
                                                             }))}
                                                         />
                                                     </label>
-                                                    <label className="form-row">
-                                                        <span>モード</span>
-                                                        <select
-                                                            value={(acSettings[device.id]?.mode ?? 1)}
-                                                            onChange={(e) => setAcSettings(prev => ({
-                                                                ...prev,
-                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), mode: Number(e.target.value) as AirconMode }
-                                                            }))}
-                                                        >
-                                                            <option value={1}>Auto(1)</option>
-                                                            <option value={2}>Cool(2)</option>
-                                                            <option value={3}>Dry(3)</option>
-                                                            <option value={4}>Fan(4)</option>
-                                                            <option value={5}>Heat(5)</option>
-                                                        </select>
-                                                    </label>
-                                                    <label className="form-row">
-                                                        <span>風量</span>
-                                                        <select
-                                                            value={(acSettings[device.id]?.fanSpeed ?? 1)}
-                                                            onChange={(e) => setAcSettings(prev => ({
-                                                                ...prev,
-                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), fanSpeed: Number(e.target.value) as FanSpeed }
-                                                            }))}
-                                                        >
-                                                            <option value={1}>Auto(1)</option>
-                                                            <option value={2}>Low(2)</option>
-                                                            <option value={3}>Medium(3)</option>
-                                                            <option value={4}>High(4)</option>
-                                                        </select>
-                                                    </label>
-                                                    <label className="form-row">
-                                                        <span>電源</span>
-                                                        <select
-                                                            value={(acSettings[device.id]?.power ?? 'on')}
-                                                            onChange={(e) => setAcSettings(prev => ({
-                                                                ...prev,
-                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), power: e.target.value as 'on' | 'off' }
-                                                            }))}
-                                                        >
-                                                            <option value={'on'}>ON</option>
-                                                            <option value={'off'}>OFF</option>
-                                                        </select>
-                                                    </label>
+
+                                                    {/* 電源がONのときだけ他項目を表示 */}
+                                                    {((acSettings[device.id]?.power ?? 'on') === 'on') && (
+                                                        <>
+                                                            <label className="form-row">
+                                                                <span>温度</span>
+                                                                <input
+                                                                    type="number"
+                                                                    min={16}
+                                                                    max={30}
+                                                                    value={(acSettings[device.id]?.temperature ?? 26)}
+                                                                    onChange={(e) => setAcSettings(prev => ({
+                                                                        ...prev,
+                                                                        [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), temperature: Number(e.target.value) }
+                                                                    }))}
+                                                                />
+                                                            </label>
+                                                            <label className="form-row">
+                                                                <span>モード</span>
+                                                                <select
+                                                                    value={(acSettings[device.id]?.mode ?? 1)}
+                                                                    onChange={(e) => setAcSettings(prev => ({
+                                                                        ...prev,
+                                                                        [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), mode: Number(e.target.value) as AirconMode }
+                                                                    }))}
+                                                                >
+                                                                    <option value={1}>Auto(1)</option>
+                                                                    <option value={2}>Cool(2)</option>
+                                                                    <option value={3}>Dry(3)</option>
+                                                                    <option value={4}>Fan(4)</option>
+                                                                    <option value={5}>Heat(5)</option>
+                                                                </select>
+                                                            </label>
+                                                            <label className="form-row">
+                                                                <span>風量</span>
+                                                                <select
+                                                                    value={(acSettings[device.id]?.fanSpeed ?? 1)}
+                                                                    onChange={(e) => setAcSettings(prev => ({
+                                                                        ...prev,
+                                                                        [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), fanSpeed: Number(e.target.value) as FanSpeed }
+                                                                    }))}
+                                                                >
+                                                                    <option value={1}>Auto(1)</option>
+                                                                    <option value={2}>Low(2)</option>
+                                                                    <option value={3}>Medium(3)</option>
+                                                                    <option value={4}>High(4)</option>
+                                                                </select>
+                                                            </label>
+                                                        </>
+                                                    )}
+
                                                     <div className="form-actions">
                                                         <button onClick={() => handleAirconSend(device)}>送信</button>
                                                     </div>
