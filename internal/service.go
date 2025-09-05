@@ -84,3 +84,15 @@ func (s *SwitchBotService) ControlIR(ctx context.Context, deviceID, command stri
     }
     return nil
 }
+
+// GetStatus は指定デバイスの最新ステータスを返します（Hub 2 などの温湿度・照度取得に使用）。
+func (s *SwitchBotService) GetStatus(ctx context.Context, deviceID string) (sb.DeviceStatus, error) {
+    if err := s.ensureClient(); err != nil {
+        return sb.DeviceStatus{}, err
+    }
+    st, err := s.client.Status(ctx, deviceID)
+    if err != nil {
+        return sb.DeviceStatus{}, fmt.Errorf("デバイスステータス取得に失敗しました: %w", err)
+    }
+    return st, nil
+}

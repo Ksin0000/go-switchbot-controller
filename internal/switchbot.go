@@ -10,6 +10,8 @@ import (
 type SwitchBotClient interface {
     List(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error)
     SendRawCommand(ctx context.Context, deviceID string, req sb.DeviceCommandRequest) error
+    // Status は物理デバイスの現在ステータスを返します。
+    Status(ctx context.Context, deviceID string) (sb.DeviceStatus, error)
 }
 
 // sbClient は上流ライブラリを用いた具象実装です。
@@ -24,4 +26,8 @@ func (c *sbClient) List(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, 
 
 func (c *sbClient) SendRawCommand(ctx context.Context, deviceID string, req sb.DeviceCommandRequest) error {
     return c.raw.Device().Command(ctx, deviceID, req)
+}
+
+func (c *sbClient) Status(ctx context.Context, deviceID string) (sb.DeviceStatus, error) {
+    return c.raw.Device().Status(ctx, deviceID)
 }

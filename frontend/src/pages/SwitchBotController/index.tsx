@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import '../../App.css'; // 共通スタイルをインポート
 import { MdPowerSettingsNew, MdOpenInFull, MdCloseFullscreen, MdExpandMore, MdExpandLess } from 'react-icons/md';
 import './style.css';
-import { InitSwitchBotAndFetchDevices, ControlInfraredRemote } from '../../../wailsjs/go/main/App';
+import { InitSwitchBotAndFetchDevices, ControlInfraredRemote, GetDeviceEnvStatus } from '../../../wailsjs/go/main/App';
 import { main } from '../../../wailsjs/go/models';
 
 interface LogEntry {
@@ -28,6 +28,8 @@ function SwitchBotController() {
     const [isLoading, setIsLoading] = useState(true);
     const [acSettings, setAcSettings] = useState<Record<string, AirconSetting>>({});
     const [detailsOpen, setDetailsOpen] = useState<Record<string, boolean>>({});
+    const [envMap, setEnvMap] = useState<Record<string, main.EnvStatus | undefined>>({});
+    const ENV_REFRESH_MS = 30_000; // 自動更新間隔(ミリ秒)
 
     const modeOptions: { val: AirconMode; label: string }[] = [
         { val: 1, label: 'Auto' },
@@ -73,7 +75,8 @@ function SwitchBotController() {
                     deviceType: r.remoteType,
                 }));
 
-                setAllDevices([...physicals, ...remotes]);
+                const merged = [...physicals, ...remotes];
+                setAllDevices(merged);
                 // ACデバイスに初期値を設定
                 const initAC: Record<string, AirconSetting> = {};
                 remotes.filter(r => r.deviceType.includes('Air Conditioner')).forEach(r => {
@@ -90,6 +93,17 @@ function SwitchBotController() {
                     sessionStorage.setItem('SB_AUTH_LOGGED', '1');
                 }
                 addLog('デバイスリストを取得しました。');
+
+                // Hub系デバイスの環境値を初回取得
+                const hubs = merged.filter(d => d.type === 'physical' && d.deviceType.includes('Hub'));
+                for (const h of hubs) {
+                    try {
+                        const st = await GetDeviceEnvStatus(h.id);
+                        setEnvMap(prev => ({ ...prev, [h.id]: st }));
+                    } catch (e: any) {
+                        addLog(`${h.name} の環境値取得に失敗: ${e?.message || String(e)}`, 'error');
+                    }
+                }
             } catch (err: any) {
                 addLog(`${err?.message || String(err)}`, 'error');
             } finally {
@@ -99,6 +113,30 @@ function SwitchBotController() {
 
         fetchAllDevices();
     }, []);
+
+    // Hub系デバイスの環境値を自動更新
+    useEffect(() => {
+        const hubs = allDevices.filter(d => d.type === 'physical' && d.deviceType.includes('Hub'));
+        if (hubs.length === 0) return;
+
+        let cancelled = false;
+        const tick = async () => {
+            for (const h of hubs) {
+                try {
+                    const st = await GetDeviceEnvStatus(h.id);
+                    if (!cancelled) setEnvMap(prev => ({ ...prev, [h.id]: st }));
+                } catch {
+                    // 自動更新はログを出さずに黙ってスキップ
+                }
+            }
+        };
+
+        const id = window.setInterval(tick, ENV_REFRESH_MS);
+        return () => {
+            cancelled = true;
+            clearInterval(id);
+        };
+    }, [allDevices]);
 
     const handleRemoteControl = async (deviceId: string, command: string, deviceName: string) => {
         try {
@@ -126,6 +164,16 @@ function SwitchBotController() {
 
     const toggleDetails = (deviceId: string) => {
         setDetailsOpen(prev => ({ ...prev, [deviceId]: !prev[deviceId] }));
+    };
+
+    const refreshEnv = async (deviceId: string, deviceName?: string) => {
+        try {
+            const st = await GetDeviceEnvStatus(deviceId);
+            setEnvMap(prev => ({ ...prev, [deviceId]: st }));
+            if (deviceName) addLog(`${deviceName} の環境値を更新しました。`);
+        } catch (e: any) {
+            if (deviceName) addLog(`${deviceName} の環境値更新に失敗: ${e?.message || String(e)}`, 'error');
+        }
     };
 
     return (
@@ -156,7 +204,10 @@ function SwitchBotController() {
                                         <div className="remote-buttons">
                                             {(device.deviceType.includes('Hub')) && (
                                                 <>
-                                                    ここに湿度、温度、照度を表示する
+                                                    <span className="sensor-badge">温度: {envMap[device.id]?.temperature ?? '—'}°C</span>
+                                                    <span className="sensor-badge">湿度: {envMap[device.id]?.humidity ?? '—'}%</span>
+                                                    <span className="sensor-badge">照度: {envMap[device.id]?.lightLevel ?? '—'}</span>
+                                                    <button className="send-inline" onClick={() => refreshEnv(device.id, device.name)}>更新</button>
                                                 </>
                                             )}
                                             {(device.type === 'infrared' && (device.deviceType.includes('Light'))) && (

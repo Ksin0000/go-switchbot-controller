@@ -43,3 +43,19 @@ func (a *App) InitSwitchBotAndFetchDevices() (DeviceLists, error) {
 func (a *App) ControlInfraredRemote(deviceID string, command string) error {
     return a.svc.ControlIR(a.ctx, deviceID, command)
 }
+
+// EnvStatus はUIに返す環境値（温度・湿度・照度）だけを持つ簡易構造体です。
+type EnvStatus struct {
+    Temperature float64 `json:"temperature"`
+    Humidity    int     `json:"humidity"`
+    LightLevel  int     `json:"lightLevel"`
+}
+
+// GetDeviceEnvStatus は指定デバイス（例: Hub 2）の環境値を返します。
+func (a *App) GetDeviceEnvStatus(deviceID string) (EnvStatus, error) {
+    st, err := a.svc.GetStatus(a.ctx, deviceID)
+    if err != nil {
+        return EnvStatus{}, err
+    }
+    return EnvStatus{Temperature: st.Temperature, Humidity: st.Humidity, LightLevel: st.LightLevel}, nil
+}
