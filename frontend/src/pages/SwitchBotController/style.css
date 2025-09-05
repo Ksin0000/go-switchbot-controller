@@ -116,16 +116,20 @@
 }
 
 .remote-buttons button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
     padding: 8px 12px;
+    line-height: 1;
     border: none;
     border-radius: 5px;
     background-color: #3a4b64;
     color: white;
     cursor: pointer;
     transition: background-color 0.2s;
+    user-select: none;
 }
 
 .remote-buttons button:hover {
@@ -154,16 +158,106 @@
 
 .ac-detail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: 1fr; /* 縦に1列 */
     gap: 10px;
     align-items: center;
 }
+
+/* 下段のコントロールを横一列にし、右端に送信ボタン */
+.ac-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.ac-controls-row .form-actions { margin-left: auto; }
 
 .form-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+}
+
+.row-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.send-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 32px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3a4b64;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    line-height: 1;
+    user-select: none;
+}
+.send-inline:hover { background-color: #5a6b84; }
+
+/* セグメント型ラジオ */
+.segmented {
+    display: inline-flex;
+    align-items: center;
+    background: #2f3e57;
+    border: 1px solid #2a364b;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.segmented .seg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 6px 10px;
+    background: transparent;
+    color: #dbe5f3;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    user-select: none;
+}
+.segmented .seg + .seg { border-left: 1px solid #2a364b; }
+.segmented .seg:hover { background: #3a4b64; }
+.segmented .seg.active { background: #5a6b84; color: #fff; }
+.segmented .seg .seg-label { font-size: 0.9rem; }
+
+/* 温度ステッパー */
+.temp-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.temp-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    border-radius: 6px;
+    border: 1px solid #2f3e57;
+    background: #3a4b64;
+    color: #fff;
+    cursor: pointer;
+}
+.temp-btn.wide { width: 40px; }
+.temp-btn:hover { background: #5a6b84; }
+.temp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.temp-value {
+    min-width: 54px;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #2f3e57;
+    background: #2f3e57;
 }
 
 .form-row input[type="number"],
@@ -185,31 +279,44 @@
 /* 電源トグル */
 .power-toggle {
     position: relative;
-    display: inline-block;
-    width: 52px;
-    height: 32px;
-    border: none;
-    border-radius: 16px;
+    display: inline-flex; /* 見た目=クリック範囲 */
+    align-items: center;
+    justify-content: flex-start;
+    width: 46px;
+    height: 26px;
+    box-sizing: border-box;
+    border: 1px solid #2f3e57;
+    border-radius: 6px; /* 角を小さめに */
     cursor: pointer;
-    background: #3a3a3c; /* iOSオフに近い色（ダーク系）*/
-    transition: background-color 0.2s ease;
+    background: #3a4b64; /* アプリ配色に合わせたダークブルー */
+    transition: background-color 140ms ease, border-color 140ms ease;
     padding: 0; /* テキスト無し */
+    line-height: 1;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
-.power-toggle.on { background: #34c759; } /* iOSグリーン */
-.power-toggle.off { background: #3a3a3c; }
+.power-toggle.on { background: #5a6b84; border-color: #6c89a3; }
+.power-toggle.off { background: #3a4b64; border-color: #2f3e57; }
 
 .power-toggle::after {
     content: "";
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 28px;
-    height: 28px;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.04);
-    transition: transform 0.2s ease;
+    top: 1px;
+    left: 1px;
+    width: 22px;
+    height: 22px;
+    background: #e6edf7; /* うっすら青みのある明色 */
+    border-radius: 6px; /* ノブも少し角張らせる */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.06);
+/* クリック領域の基礎整備 */
+*, *::before, *::after { box-sizing: border-box; }
+button { font: inherit; }
+
+    transition: transform 140ms ease;
     will-change: transform;
+    pointer-events: none; /* ノブがクリックを遮らないように */
 }
 .power-toggle.on::after { transform: translateX(20px); }
 

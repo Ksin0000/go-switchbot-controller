@@ -29,6 +29,20 @@ function SwitchBotController() {
     const [acSettings, setAcSettings] = useState<Record<string, AirconSetting>>({});
     const [detailsOpen, setDetailsOpen] = useState<Record<string, boolean>>({});
 
+    const modeOptions: { val: AirconMode; label: string }[] = [
+        { val: 1, label: 'Auto' },
+        { val: 2, label: 'Cool' },
+        { val: 3, label: 'Dry' },
+        { val: 4, label: 'Fan' },
+        { val: 5, label: 'Heat' },
+    ];
+    const fanOptions: { val: FanSpeed; label: string }[] = [
+        { val: 1, label: 'Auto' },
+        { val: 2, label: 'Low' },
+        { val: 3, label: 'Med' },
+        { val: 4, label: 'High' },
+    ];
+
     const addLog = (message: string, type: 'info' | 'error' = 'info') => {
         const newLog: LogEntry = {
             timestamp: new Date().toLocaleTimeString(),
@@ -100,6 +114,14 @@ function SwitchBotController() {
         const st = acSettings[device.id] || { temperature: 26, mode: 1 as AirconMode, fanSpeed: 1 as FanSpeed, power: 'on' as const };
         const param = `${st.temperature},${st.mode},${st.fanSpeed},${st.power}`;
         handleRemoteControl(device.id, `setAll:${param}`, device.name);
+    };
+
+    const adjustTemp = (deviceId: string, delta: number) => {
+        setAcSettings(prev => {
+            const base: AirconSetting = prev[deviceId] || { temperature: 26, mode: 1 as AirconMode, fanSpeed: 1 as FanSpeed, power: 'on' };
+            const next = Math.max(16, Math.min(30, base.temperature + delta));
+            return { ...prev, [deviceId]: { ...base, temperature: next } };
+        });
     };
 
     const toggleDetails = (deviceId: string) => {
@@ -182,73 +204,108 @@ function SwitchBotController() {
                                             {(device.type === 'infrared' && (device.deviceType.includes('Air Conditioner'))) ? (
                                                 <div className="ac-detail-grid">
                                                     {/* 電源（先頭・トグル） */}
-                                                    <label className="form-row">
+                                                    <div className="form-row">
                                                         <span>電源</span>
-                                                        <button
-                                                            className={`power-toggle ${((acSettings[device.id]?.power ?? 'on') === 'on') ? 'on' : 'off'}`}
-                                                            role="switch"
-                                                            aria-label="電源"
-                                                            aria-checked={(acSettings[device.id]?.power ?? 'on') === 'on'}
-                                                            onClick={() => setAcSettings(prev => ({
-                                                                ...prev,
-                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), power: (prev[device.id]?.power ?? 'on') === 'on' ? 'off' : 'on' }
-                                                            }))}
-                                                        />
-                                                    </label>
-
-                                                    {/* 電源がONのときだけ他項目を表示 */}
+                                                        <span className="row-controls">
+                                                            <button
+                                                                className={`power-toggle ${((acSettings[device.id]?.power ?? 'on') === 'on') ? 'on' : 'off'}`}
+                                                                role="switch"
+                                                                aria-label="電源"
+                                                                aria-checked={(acSettings[device.id]?.power ?? 'on') === 'on'}
+                                                                onClick={() => setAcSettings(prev => ({
+                                                                    ...prev,
+                                                                    [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), power: (prev[device.id]?.power ?? 'on') === 'on' ? 'off' : 'on' }
+                                                                }))}
+                                                            />
+                                                            <button className="send-inline" onClick={() => handleAirconSend(device)}>送信</button>
+                                                        </span>
+                                                    </div>
                                                     {((acSettings[device.id]?.power ?? 'on') === 'on') && (
                                                         <>
-                                                            <label className="form-row">
+                                                            <div className="form-row">
                                                                 <span>温度</span>
-                                                                <input
-                                                                    type="number"
-                                                                    min={16}
-                                                                    max={30}
-                                                                    value={(acSettings[device.id]?.temperature ?? 26)}
-                                                                    onChange={(e) => setAcSettings(prev => ({
-                                                                        ...prev,
-                                                                        [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), temperature: Number(e.target.value) }
-                                                                    }))}
-                                                                />
-                                                            </label>
-                                                            <label className="form-row">
+                                                                <span className="temp-controls">
+                                                                    <button
+                                                                        type="button"
+                                                                        className="temp-btn wide"
+                                                                        aria-label="Decrease temperature by 5"
+                                                                        onClick={() => adjustTemp(device.id, -5)}
+                                                                        disabled={(acSettings[device.id]?.temperature ?? 26) <= 16}
+                                                                    >
+                                                                        {'<<'}
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="temp-btn"
+                                                                        aria-label="Decrease temperature"
+                                                                        onClick={() => adjustTemp(device.id, -1)}
+                                                                        disabled={(acSettings[device.id]?.temperature ?? 26) <= 16}
+                                                                    >
+                                                                        {'<'}
+                                                                    </button>
+                                                                    <span className="temp-value">{acSettings[device.id]?.temperature ?? 26}°C</span>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="temp-btn"
+                                                                        aria-label="Increase temperature"
+                                                                        onClick={() => adjustTemp(device.id, +1)}
+                                                                        disabled={(acSettings[device.id]?.temperature ?? 26) >= 30}
+                                                                    >
+                                                                        {'>'}
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="temp-btn wide"
+                                                                        aria-label="Increase temperature by 5"
+                                                                        onClick={() => adjustTemp(device.id, +5)}
+                                                                        disabled={(acSettings[device.id]?.temperature ?? 26) >= 30}
+                                                                    >
+                                                                        {'>>'}
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                            <div className="form-row">
                                                                 <span>モード</span>
-                                                                <select
-                                                                    value={(acSettings[device.id]?.mode ?? 1)}
-                                                                    onChange={(e) => setAcSettings(prev => ({
-                                                                        ...prev,
-                                                                        [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), mode: Number(e.target.value) as AirconMode }
-                                                                    }))}
-                                                                >
-                                                                    <option value={1}>Auto(1)</option>
-                                                                    <option value={2}>Cool(2)</option>
-                                                                    <option value={3}>Dry(3)</option>
-                                                                    <option value={4}>Fan(4)</option>
-                                                                    <option value={5}>Heat(5)</option>
-                                                                </select>
-                                                            </label>
-                                                            <label className="form-row">
+                                                                <div className="segmented" role="radiogroup" aria-label="Mode">
+                                                                    {modeOptions.map(({ val, label }) => (
+                                                                        <button
+                                                                            key={val}
+                                                                            type="button"
+                                                                            role="radio"
+                                                                            aria-checked={(acSettings[device.id]?.mode ?? 1) === val}
+                                                                            className={`seg ${((acSettings[device.id]?.mode ?? 1) === val) ? 'active' : ''}`}
+                                                                            onClick={() => setAcSettings(prev => ({
+                                                                                ...prev,
+                                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), mode: val }
+                                                                            }))}
+                                                                        >
+                                                                            <span className="seg-label">{label}</span>
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                            <div className="form-row">
                                                                 <span>風量</span>
-                                                                <select
-                                                                    value={(acSettings[device.id]?.fanSpeed ?? 1)}
-                                                                    onChange={(e) => setAcSettings(prev => ({
-                                                                        ...prev,
-                                                                        [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), fanSpeed: Number(e.target.value) as FanSpeed }
-                                                                    }))}
-                                                                >
-                                                                    <option value={1}>Auto(1)</option>
-                                                                    <option value={2}>Low(2)</option>
-                                                                    <option value={3}>Medium(3)</option>
-                                                                    <option value={4}>High(4)</option>
-                                                                </select>
-                                                            </label>
+                                                                <div className="segmented" role="radiogroup" aria-label="Fan Speed">
+                                                                    {fanOptions.map(({ val, label }) => (
+                                                                        <button
+                                                                            key={val}
+                                                                            type="button"
+                                                                            role="radio"
+                                                                            aria-checked={(acSettings[device.id]?.fanSpeed ?? 1) === val}
+                                                                            className={`seg ${((acSettings[device.id]?.fanSpeed ?? 1) === val) ? 'active' : ''}`}
+                                                                            onClick={() => setAcSettings(prev => ({
+                                                                                ...prev,
+                                                                                [device.id]: { ...(prev[device.id] || { temperature: 26, mode: 1, fanSpeed: 1, power: 'on' }), fanSpeed: val }
+                                                                            }))}
+                                                                        >
+                                                                            <span className="seg-label">{label}</span>
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
                                                         </>
                                                     )}
-
-                                                    <div className="form-actions">
-                                                        <button onClick={() => handleAirconSend(device)}>送信</button>
-                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="detail-empty">このデバイスの詳細設定は未実装です。</div>
