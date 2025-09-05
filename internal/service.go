@@ -8,17 +8,18 @@ import (
     sb "github.com/nasa9084/go-switchbot/v4"
 )
 
-// Service provides application use-cases to be invoked from the UI layer.
-type Service struct {
+// SwitchBotService は UI 層から呼び出されるアプリケーションのユースケースを提供します。
+type SwitchBotService struct {
     client SwitchBotClient
 }
 
-func NewService() *Service {
-    return &Service{}
+// NewSwitchBotService は新しい SwitchBotService を作成します。
+func NewSwitchBotService() *SwitchBotService {
+    return &SwitchBotService{}
 }
 
-// ensureClient lazily initialises the SwitchBot client from env.
-func (s *Service) ensureClient() error {
+// ensureClient は環境変数から SwitchBot クライアントを遅延初期化します。
+func (s *SwitchBotService) ensureClient() error {
     if s.client != nil {
         return nil
     }
@@ -30,8 +31,8 @@ func (s *Service) ensureClient() error {
     return nil
 }
 
-// InitAndFetchDevices performs credentials + connectivity checks by fetching devices.
-func (s *Service) InitAndFetchDevices(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error) {
+// InitAndFetchDevices は資格情報と接続性の確認のためにデバイス一覧を取得します。
+func (s *SwitchBotService) InitAndFetchDevices(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error) {
     if err := s.ensureClient(); err != nil {
         return nil, nil, err
     }
@@ -42,10 +43,8 @@ func (s *Service) InitAndFetchDevices(ctx context.Context) ([]sb.Device, []sb.In
     return devices, virtuals, nil
 }
 
-// （削除）GetAllDevices: 未使用のため削除しました。
-
 // ControlIR: 赤外線リモコンへコマンドを送信します。
-func (s *Service) ControlIR(ctx context.Context, deviceID, command string) error {
+func (s *SwitchBotService) ControlIR(ctx context.Context, deviceID, command string) error {
     if err := s.ensureClient(); err != nil {
         return err
     }
@@ -71,4 +70,3 @@ func (s *Service) ControlIR(ctx context.Context, deviceID, command string) error
     }
     return nil
 }
-

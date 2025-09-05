@@ -6,15 +6,15 @@ import (
     "os/exec"
 )
 
-// SleepNow puts the PC to sleep immediately (Windows only).
+// SleepNow はWindowsをPCを即時スリープさせます。
 func SleepNow() string {
     exec.Command("powercfg", "-h", "off").Run()
     exec.Command("rundll32.exe", "powrprof.dll,SetSuspendState", "0,1,0").Run()
     exec.Command("powercfg", "-h", "on").Run()
-    return "PCをスリープさせました。"
+    return "PCをスリープにします。"
 }
 
-// ShutdownNow shuts down Windows immediately.
+// ShutdownNow はWindowsを即時シャットダウンします。
 func ShutdownNow() string {
     exec.Command("shutdown", "/s", "/f", "/t", "0").Run()
     return "PCの電源をオフにします。"

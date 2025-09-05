@@ -7,16 +7,16 @@ import (
     "github.com/nasa9084/go-switchbot/v4"
 )
 
-// App struct
+// App 構造体
 type App struct {
     ctx context.Context
-    svc *appcore.Service
+    svc *appcore.SwitchBotService
 }
 
-// NewApp creates a new App application struct
-func NewApp() *App { return &App{svc: appcore.NewService()} }
+// NewApp は新しい App 構造体を作成します。
+func NewApp() *App { return &App{svc: appcore.NewSwitchBotService()} }
 
-// startup is called when the app starts. The context is saved
+// startup はアプリ起動時に呼び出され、コンテキストを保存します。
 func (a *App) startup(ctx context.Context) { a.ctx = ctx }
 
 // SleepNow はPCを即時スリープさせます（内部実装に委譲）
@@ -24,13 +24,13 @@ func (a *App) SleepNow() string { return appcore.SleepNow() }
 // ShutdownNow はPCを即時シャットダウンします（内部実装に委譲）
 func (a *App) ShutdownNow() string { return appcore.ShutdownNow() }
 
-// DeviceLists holds both physical and virtual devices.
+// DeviceLists は物理デバイスと赤外線リモコンの両方を保持します。
 type DeviceLists struct {
     Devices         []switchbot.Device         `json:"devices"`
     InfraredRemotes []switchbot.InfraredDevice `json:"infraredRemotes"`
 }
 
-// InitSwitchBotAndFetchDevices performs staged initialization and returns device lists.
+// InitSwitchBotAndFetchDevices は段階的な初期化を行い、デバイス一覧を返します。
 func (a *App) InitSwitchBotAndFetchDevices() (DeviceLists, error) {
     devices, virtuals, err := a.svc.InitAndFetchDevices(a.ctx)
     if err != nil {
@@ -39,7 +39,7 @@ func (a *App) InitSwitchBotAndFetchDevices() (DeviceLists, error) {
     return DeviceLists{Devices: devices, InfraredRemotes: virtuals}, nil
 }
 
-// ControlInfraredRemote sends a command to a virtual infrared remote device.
+// ControlInfraredRemote は仮想の赤外線リモコンにコマンドを送信します。
 func (a *App) ControlInfraredRemote(deviceID string, command string) error {
     return a.svc.ControlIR(a.ctx, deviceID, command)
 }

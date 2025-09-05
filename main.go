@@ -14,16 +14,16 @@ import (
 var assets embed.FS
 
 func main() {
-    // Load .env file
+    // .env を読み込む
     err := godotenv.Load()
     if err != nil {
         log.Println("Warning: .env file not found. SWITCHBOT_TOKEN and SECRET must be set in the environment.")
     }
 
-	// Create an instance of the app structure
+	// アプリケーション構造体のインスタンスを作成
 	app := NewApp()
 
-	// Create application with options
+	// オプションを指定してアプリケーションを起動
 	err = wails.Run(&options.App{
 		Title:  "go-switchbot-controller",
 		Width:  1024,

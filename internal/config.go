@@ -5,13 +5,13 @@ import (
     "os"
 )
 
-// Config holds credentials and optional settings.
+// Config は認証情報や任意設定を保持します。
 type Config struct {
     Token  string
     Secret string
 }
 
-// LoadFromEnv loads SwitchBot credentials from environment variables.
+// LoadFromEnv は環境変数から SwitchBot の認証情報を読み込みます。
 func LoadFromEnv() (Config, error) {
     token := os.Getenv("SWITCHBOT_TOKEN")
     secret := os.Getenv("SECRET")
