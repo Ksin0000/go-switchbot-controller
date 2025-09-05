@@ -135,10 +135,10 @@ function SwitchBotController() {
                                         {device.deviceType.includes('Curtain') && (
                                             <>
                                                 <button onClick={() => { addLog("ボタンの動作は未実装") }} title="開ける">
-                                                    <MdOpenInFull /> 開ける
+                                                    <MdOpenInFull />
                                                 </button>
                                                 <button onClick={() => { addLog("ボタンの動作は未実装") }} title="閉める">
-                                                    <MdCloseFullscreen /> 閉める
+                                                    <MdCloseFullscreen />
                                                 </button>
                                             </>
                                         )}

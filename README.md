@@ -30,33 +30,3 @@ To build a redistributable, production mode package, use `wails build`.
 
 Windows用には`wails build -platform windows`を実行して`build/bin/go-switchbot-controller.exe`をダブルクリック
 
-# 備忘録
-## WSL上で日本語が「□□□」（通称「豆腐」）になる対策
-
-ロケールに日本語を追加
-``` bash
-# パッケージリストを更新
-sudo apt-get update
-
-# 日本語言語パックをインストール
-sudo apt-get install -y language-pack-ja
-
-# インストール出来たかどうか確認
-locale -a
-
-#ja_JP.utf8 があるかどうか確認
-```
-
-日本語のフォントをインストール
-``` bash
-# フォントをインストール fonts-takao などでも良い
-sudo apt install fonts-noto-cjk
-```
-
-でも結局[NotoSansJP-Regular.woff2](frontend/src/assets/fonts/NotoSansJP-Regular.woff2)をダウンロードしてきて解決したので上記の操作いらないかも。
-
-## やったコマンドメモ
-``` bash
-npm install react-router-dom
-npm install react-icons
-```

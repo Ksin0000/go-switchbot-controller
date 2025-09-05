@@ -9,8 +9,6 @@ import (
 // SwitchBotClient is a small interface wrapper around the go-switchbot client.
 type SwitchBotClient interface {
     List(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error)
-    TurnOnDevice(ctx context.Context, deviceID string) error
-    TurnOffDevice(ctx context.Context, deviceID string) error
     SendRawCommand(ctx context.Context, deviceID string, req sb.DeviceCommandRequest) error
 }
 
@@ -22,14 +20,6 @@ func NewClient(cfg Config) SwitchBotClient { return &sbClient{raw: sb.New(cfg.To
 
 func (c *sbClient) List(ctx context.Context) ([]sb.Device, []sb.InfraredDevice, error) {
     return c.raw.Device().List(ctx)
-}
-
-func (c *sbClient) TurnOnDevice(ctx context.Context, deviceID string) error {
-    return c.raw.Device().Command(ctx, deviceID, sb.TurnOnCommand())
-}
-
-func (c *sbClient) TurnOffDevice(ctx context.Context, deviceID string) error {
-    return c.raw.Device().Command(ctx, deviceID, sb.TurnOffCommand())
 }
 
 func (c *sbClient) SendRawCommand(ctx context.Context, deviceID string, req sb.DeviceCommandRequest) error {

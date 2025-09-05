@@ -1,7 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import '../../App.css';
 import './style.css';
-import { InitSwitchBotAndFetchDevices, ControlInfraredRemote, TurnOffDevice, ShutdownNow, SleepNow } from '../../../wailsjs/go/main/App';
+import { InitSwitchBotAndFetchDevices, ControlInfraredRemote, ShutdownNow, SleepNow } from '../../../wailsjs/go/main/App';
 import { main } from '../../../wailsjs/go/models';
 
 type LogType = 'info' | 'error';
@@ -57,8 +57,7 @@ function GetReadyForSleep() {
                             addLog(`${d.name} に IRコマンド「${cmd}」を送信中...`);
                             await ControlInfraredRemote(d.id, cmd);
                         } else {
-                            addLog(`${d.name} をオフにしています...`);
-                            await TurnOffDevice(d.id);
+                            addLog("ボタンの動作は未実装");
                         }
                         addLog(`${d.name}: OK`);
                     } catch (e: any) {
